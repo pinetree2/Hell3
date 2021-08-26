@@ -1,8 +1,11 @@
 package com.prolificinteractive.materialcalendarview.sample;
 
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.Toast;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -22,6 +25,9 @@ import org.threeten.bp.Month;
 public class SwappableBasicActivityDecorated extends AppCompatActivity
     implements OnDateSelectedListener {
 
+  MediaPlayer mediaPlayer;
+  private long backBtnTime = 0;
+
   private final OneDayDecorator oneDayDecorator = new OneDayDecorator();
 
   @BindView(R.id.calendarView) MaterialCalendarView widget;
@@ -30,6 +36,9 @@ public class SwappableBasicActivityDecorated extends AppCompatActivity
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_basic_modes);
     ButterKnife.bind(this);
+    mediaPlayer = MediaPlayer.create(this, R.raw.bgm);
+    mediaPlayer.setLooping(true); //무한재생
+    mediaPlayer.start();
 
     widget.setOnDateChangedListener(this);
     widget.setShowOtherDates(MaterialCalendarView.SHOW_ALL);
@@ -71,5 +80,24 @@ public class SwappableBasicActivityDecorated extends AppCompatActivity
     widget.state().edit()
         .setCalendarDisplayMode(CalendarMode.MONTHS)
         .commit();
+  }
+
+  @Override
+  protected void onDestroy() {
+    super.onDestroy();
+    mediaPlayer.stop();
+  }
+
+  @Override
+  public void onBackPressed() {
+    long curTime = System.currentTimeMillis();
+    long gapTime = curTime - backBtnTime;
+
+    if(0<=gapTime && 2000 >=gapTime){
+      super.onBackPressed();
+    }else{
+      backBtnTime = curTime;
+      Toast.makeText(this,"한번더 누르면 종료됩니다.",Toast.LENGTH_SHORT).show();
+    }
   }
 }
